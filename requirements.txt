@@ -1,0 +1,9 @@
+os
+pathlib
+pandas
+img2pdf
+PIL
+shutil
+time
+PyPDF2
+subprocess
