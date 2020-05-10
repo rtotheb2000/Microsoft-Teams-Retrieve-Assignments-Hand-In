@@ -232,6 +232,7 @@ def DetectCoherentImages(root_path=root_path, destination_path=os.path.join(os.p
                 print(df_temp)
                 print(mi)
             src = df_temp.loc[mi, 'Dateipfad']
+            Kurs = df_temp.reset_index().loc[0, 'Kurs']
             dst =  os.path.join(destination_path, Kurs, df_temp.loc[mi, 'Dateiname intern'])
             if not os.path.exists(dst):
                 shutil.copy2(src, dst)
