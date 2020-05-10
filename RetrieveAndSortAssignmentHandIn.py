@@ -160,8 +160,11 @@ def FullDataFrame(root_path=root_path, selected=['Mathematik','Physik']):
 def CreateFolderStructure(root_path=root_path, destination_path=os.path.join(os.path.expanduser('~'),'Schülerprodukte')):
     df = FullDataFrame(root_path=root_path)
     for Kurs in df.Kurs.unique():
-        print('\nEs wird folgender Ordner erstellt, falls nicht vorhanden:\t{}'.format(os.path.join(destination_path, Kurs)))
+        # print('\nEs wird folgender Ordner erstellt, falls nicht vorhanden:\t{}'.format(os.path.join(destination_path, Kurs)))
         Path(os.path.join(destination_path, Kurs)).mkdir(parents=True, exist_ok=True)
+        for Aufgabe in df.loc[(df['Kurs']==Kurs)].Aufgabe.unique():
+            print('\nEs wird folgender Ordner erstellt, falls nicht vorhanden:\t{}'.format(os.path.join(destination_path, Kurs, Aufgabe)))
+            Path(os.path.join(destination_path, Kurs, Aufgabe)).mkdir(parents=True, exist_ok=True)
 
 def merger(output_path, input_paths):
     pdf_merger = PdfFileMerger()
@@ -180,11 +183,8 @@ def DetectCoherentImages(root_path=root_path, destination_path=os.path.join(os.p
     if debug:
         print(dfBild)
     for mi in dfBild.index.unique():
-        if debug:
-            print(mi)
         df_temp = dfBild.loc[mi,:].reset_index()
         imagelist = []
-        new_filename = ''
         for index, row in df_temp.iterrows():
             if os.path.exists(df_temp.loc[index, 'Dateipfad']):
                 im  = Image.open(df_temp.loc[index, 'Dateipfad'])
@@ -192,20 +192,21 @@ def DetectCoherentImages(root_path=root_path, destination_path=os.path.join(os.p
                 imagelist.append(imc)
             else:
                 raise ValueError('{} does not exist.'.format(df_temp.loc[index, 'Dateipfad']))
-        new_filename = os.path.splitext(os.path.join(df_temp.loc[index, 'Dateiname intern']))[0] + '.pdf'
-        Kurs = df_temp.loc[index, 'Kurs']
-        writeTo = os.path.join(destination_path, Kurs, new_filename)
+        dst = os.path.join(destination_path,
+                           df_temp.loc[index, 'Kurs'],
+                           df_temp.loc[index, 'Aufgabe'],
+                           os.path.splitext(os.path.join(df_temp.loc[index, 'Dateiname intern']))[0] + '.pdf')
         if debug:
             print('type(imagelist)',type(imagelist))
             print('type(imagelist[0])',type(imagelist[0]))
-        if not os.path.exists(writeTo):
+        if not os.path.exists(dst):
             if len(imagelist)>1:
-                imagelist[0].save(writeTo,save_all=True, append_images=imagelist[1:])
+                imagelist[0].save(dst,save_all=True, append_images=imagelist[1:])
             else:
-                imagelist[0].save(writeTo,save_all=True)
-            print('\n[BILD]:\tFolgende zusammengeführte Datei wurde gespeichert:\t{}'.format(writeTo))
+                imagelist[0].save(dst,save_all=True)
+            print('\n[BILD]:\tFolgende zusammengeführte Datei wurde gespeichert:\t{}'.format(dst))
         else:
-            print('\n[BILD]:\tFolgende Datei wurde übersprungen:\t\t\t{}'.format(writeTo))
+            print('\n[BILD]:\tFolgende Datei wurde übersprungen:\t\t\t{}'.format(dst))
     # Selecting only Pdfs
     dfPDF = df.loc[df['Dateityp']=='Pdf']
     for mi in dfPDF.index.unique():
@@ -218,53 +219,45 @@ def DetectCoherentImages(root_path=root_path, destination_path=os.path.join(os.p
                     pathslist.append(df_temp.loc[index, 'Dateipfad'])
                 else:
                     raise ValueError('{} does not exist.'.format(df_temp.loc[index, 'Dateipfad']))
-            new_filename = os.path.join(df_temp.loc[index, 'Dateiname intern'])
-            Kurs = df_temp.loc[index, 'Kurs']
-            writeTo = os.path.join(destination_path, Kurs, new_filename)
-            if not os.path.exists(writeTo):
-                merger(writeTo, pathslist)
-                print('\n[PDF]:\tFolgende zusammengeführte Datei wurde gespeichert:\t{}'.format(writeTo))
+            dst = os.path.join(destination_path, df_temp.loc[index, 'Kurs'], df_temp.loc[index, 'Aufgabe'], df_temp.loc[index, 'Dateiname intern'])
+            if not os.path.exists(dst):
+                merger(dst, pathslist)
+                print('\n[PDF]:\tFolgende zusammengeführte Datei wurde gespeichert:\t{}'.format(dst))
             else:
-                print('\n[PDF]:\tFolgende Datei wurde übersprungen:\t\t\t{}'.format(writeTo))
+                print('\n[PDF]:\tFolgende Datei wurde übersprungen:\t\t\t{}'.format(dst))
         else:
-            df_temp = dfPDF.loc[mi,:]
-            if debug:
-                print(df_temp)
-                print(mi)
-            src = df_temp.loc[mi, 'Dateipfad']
-            Kurs = df_temp.reset_index().loc[0, 'Kurs']
-            dst =  os.path.join(destination_path, Kurs, df_temp.loc[mi, 'Dateiname intern'])
+            df_temp = dfPDF.loc[mi,:].reset_index()
+            src = df_temp.loc[0, 'Dateipfad']
+            dst = os.path.join(destination_path, df_temp.loc[0, 'Kurs'], df_temp.loc[0, 'Aufgabe'], df_temp.loc[0, 'Dateiname intern'])
             if not os.path.exists(dst):
                 shutil.copy2(src, dst)
-                print('\n[PDF]:\tFolgende Datei wurde als Kopie erstellt:\t\t{}'.format(writeTo))
+                print('\n[PDF]:\tFolgende Datei wurde als Kopie erstellt:\t\t{}'.format(dst))
             else:
-                print('\n[PDF]:\tFolgende Datei wurde übersprungen:\t\t\t{}'.format(writeTo))
+                print('\n[PDF]:\tFolgende Datei wurde übersprungen:\t\t\t{}'.format(dst))
     # Selecting Office 365 filetypes
     dfO365 = df.loc[(df['Dateityp']=='Word')|(df['Dateityp']=='Excel')|(df['Dateityp']=='PowerPoint')]
     if debug:
         print(dfO365)
     df_temp = dfO365.reset_index()
     for index in df_temp.index:
-        Kurs = df_temp.loc[index, 'Kurs']
-        dst = os.path.join(destination_path, Kurs, df_temp.loc[index, 'Dateiname intern'])
+        dst = os.path.join(destination_path, df_temp.loc[index, 'Kurs'], df_temp.loc[index, 'Aufgabe'], df_temp.loc[index, 'Dateiname intern'])
         if not os.path.exists(dst):
             shutil.copy2(src, dst)
-            print('\n[O365]:\tFolgende Datei wurde als Kopie erstellt:\t\t{}'.format(writeTo))
+            print('\n[O365]:\tFolgende Datei wurde als Kopie erstellt:\t\t{}'.format(dst))
         else:
-            print('\n[O365]:\tFolgende Datei wurde übersprungen:\t\t\t{}'.format(writeTo))
+            print('\n[O365]:\tFolgende Datei wurde übersprungen:\t\t\t{}'.format(dst))
     # Selecting all other filetypes
     dfOTHER = df.loc[(df['Dateityp']!='Bild')&(df['Dateityp']!='Pdf')&(df['Dateityp']!='Word')&(df['Dateityp']!='Excel')&(df['Dateityp']!='PowerPoint')]
     if debug:
         print(dfOTHER)
     df_temp = dfOTHER.reset_index()
     for index in df_temp.index:
-        Kurs = df_temp.loc[index, 'Kurs']
-        dst = os.path.join(destination_path, Kurs, df_temp.loc[index, 'Dateiname intern'])
+        dst = os.path.join(destination_path, df_temp.loc[index, 'Kurs'], df_temp.loc[index, 'Aufgabe'], df_temp.loc[index, 'Dateiname intern'])
         if not os.path.exists(dst):
             shutil.copy2(src, dst)
-            print('\n[OTHER]:\tFolgende Datei wurde als Kopie erstellt:\t\t{}'.format(writeTo))
+            print('\n[OTHER]:\tFolgende Datei wurde als Kopie erstellt:\t\t{}'.format(dst))
         else:
-            print('\n[OTHER]:\tFolgende Datei wurde übersprungen:\t\t\t{}'.format(writeTo))
+            print('\n[OTHER]:\tFolgende Datei wurde übersprungen:\t\t\t{}'.format(dst))
 
 
 def main(root_path=root_path, destination_path=os.path.join(os.path.expanduser('~'),'Schülerprodukte')):
