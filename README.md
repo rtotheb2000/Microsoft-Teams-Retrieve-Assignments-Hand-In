@@ -6,7 +6,7 @@ Download the OneDrive App <a href="https://upload.wikimedia.org/wikipedia/common
 
 Navigate to the SharePoint folder <a href="https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Microsoft_Office_SharePoint_%282018%E2%80%93present%29.svg/200px-Microsoft_Office_SharePoint_%282018%E2%80%93present%29.svg.png"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Microsoft_Office_SharePoint_%282018%E2%80%93present%29.svg/200px-Microsoft_Office_SharePoint_%282018%E2%80%93present%29.svg.png" width="30"/></a> of your organization and your class (which should be a closed team).
 
-Navigate to "Websiteinhalte" and select "Aufgaben der Schüler". 
+Navigate to "Websiteinhalte" and select "Aufgaben der Schüler".
 
 Select "Synchronisieren" on top. The OneDrive App will automatically retrieve the folder and its subdirectories.
 
@@ -16,21 +16,21 @@ This is where we can start using this script.
 
 ## Usage of the script
 
-The `root_path` must be set such that it contains the all the team directories of type `"Kursname - Aufgaben der Schüler"` 
+The `root_path` must be set such that it contains the all the team directories of type `"Kursname - Aufgaben der Schüler"`
 
 The structure of subdirectories in SharePoint/OneDrive is as follows
 
-`"Kursname - Aufgaben der Schüler"` 
+`"Kursname - Aufgaben der Schüler"`
 
-&nbsp;&nbsp;&nbsp;&#8627; `"Gesendete Dateien"` 
+&nbsp;&nbsp;&nbsp;&#8627; `"Gesendete Dateien"`
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8627; `"Name des Schülers"` (umlauts are included) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8627; `"Name des Schülers"` (umlauts are included)
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8627; `"Titel des Aufgabe"` 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8627; `"Titel des Aufgabe"`
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8627; `"Version x"` 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8627; `"Version x"`
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8627; `"*"` (filename of the handed in assignment) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8627; `"*"` (filename of the handed in assignment)
 
 This subdirectory structure is used to create a `Padas Dataframe` which contains all Metadata information such as `student`, `assigment`, `course`, etc.
 
@@ -84,7 +84,7 @@ Multiple image files are merged to a single PDF-file by usage of `Pillow` in con
 
 Single image files are converted to a single PDF-file.
 
-At the current state this script will fail when it encounters an unsupported image filetype. 
+At the current state this script will fail when it encounters an unsupported image filetype.
 
 Multiple PDF-files are merged to a single PDF-file by usage of `PyPDF2`.
 
@@ -101,5 +101,11 @@ Copied files will have the following naming scheme:
 `(version) (last name of the student) (name of the assignment) (some number to make sure there is no doubling of names)`
 
 The end of the filename (without the extension) is removed in order to keep the the total number of characters equal to 45.
+
+The output folder structure is
+
+`"Kursname"`
+
+&nbsp;&nbsp;&nbsp;&#8627; `"Aufgabe"`
 
 ![screenshot usage powershell](screenshot_powershell.png)
