@@ -7,3 +7,4 @@ shutil
 time
 PyPDF2
 subprocess
+logging
